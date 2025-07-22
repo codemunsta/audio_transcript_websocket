@@ -17,7 +17,7 @@ This is a FastAPI application with WebSocket support. It uses `uvicorn` as the A
 ### 1. Clone the repository
 
 ```bash
-git clone <your-repo-url>
+git clone https://github.com/codemunsta/audio_transcript_websocket
 ```
 ### 2. Navigate to the project directory
 ```bash
