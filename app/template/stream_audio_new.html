@@ -1,10 +1,119 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <title>$Title$</title>
+  <title>Audio WebSocket Client</title>
 </head>
 <body>
-$END$
+  <h1>Audio Streaming Demo</h1>
+
+  <label>
+    Send Mode:
+    <select id="mode">
+      <option value="chunk">Chunks (Streaming)</option>
+      <option value="blob">Blob (Full)</option>
+      <option value="base64">Base64</option>
+      <option value="raw">Raw Bytes (Uint8Array)</option>
+    </select>
+  </label>
+
+  <br><br>
+  <button onclick="startRecording()">Start Recording</button>
+  <button onclick="stopRecording()">Stop & Send</button>
+
+  <ul id="log"></ul>
+
+  <script>
+    const ws = new WebSocket("ws://localhost:8000/ws");
+
+    const log = (msg) => {
+      const li = document.createElement("li");
+      li.textContent = msg;
+      document.getElementById("log").appendChild(li);
+    };
+
+    let mediaRecorder;
+    let chunks = [];
+
+    const audioId = crypto.randomUUID();
+
+    ws.onopen = () => {
+      log("Connected to server");
+      ws.send(JSON.stringify({ event: "ping", payload: "hello server" }));
+    };
+
+    ws.onmessage = (event) => {
+      try {
+        const data = JSON.parse(event.data);
+        log(`[${data.event}]: ${JSON.stringify(data.payload)}`);
+      } catch {
+        log("Received non-JSON message");
+      }
+    };
+
+    async function startRecording() {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      mediaRecorder = new MediaRecorder(stream, { mimeType: "audio/webm" });
+
+      const mode = document.getElementById("mode").value;
+
+      ws.send(JSON.stringify({
+        event: "start_audio",
+        payload: {
+          id: audioId,
+          mode: mode
+        }
+      }));
+
+      chunks = [];
+
+      mediaRecorder.ondataavailable = (e) => {
+        if (mode === "chunk") {
+          ws.send(e.data); // Send chunk directly
+        } else {
+          chunks.push(e.data); // Store for full blob
+        }
+      };
+
+      mediaRecorder.start(250); // Emit data every 250ms
+      log("Recording started...");
+    }
+
+    function stopRecording() {
+      mediaRecorder.stop();
+
+      mediaRecorder.onstop = async () => {
+        const blob = new Blob(chunks, { type: "audio/webm" });
+        const mode = document.getElementById("mode").value;
+
+        if (mode === "blob") {
+          ws.send(blob);
+        } else if (mode === "base64") {
+          const base64 = await blobToBase64(blob);
+          ws.send(JSON.stringify({
+            event: "base_64_audio",
+            payload: {
+              id: audioId,
+              audio: base64
+            }
+          }));
+        } else if (mode === "raw") {
+          const buffer = await blob.arrayBuffer();
+          ws.send(new Uint8Array(buffer));
+        }
+
+        ws.send(JSON.stringify({ event: "stop_audio" }));
+        log("Recording stopped and sent");
+      };
+    }
+
+    function blobToBase64(blob) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result.split(',')[1]);
+        reader.onerror = reject;
+        reader.readAsDataURL(blob);
+      });
+    }
+  </script>
 </body>
 </html>

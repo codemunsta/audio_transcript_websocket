@@ -1,10 +1,74 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="">
 <head>
-  <meta charset="UTF-8">
-  <title>$Title$</title>
+    <title>Stream Audio via WebSocket</title>
 </head>
 <body>
-$END$
+    <h2>Streaming Audio to FastAPI</h2>
+    <button onclick="startRecording()">Start</button>
+    <button onclick="stopRecording()">Stop</button>
+    <ul id="log"></ul>
+
+    <script>
+        const ws = new WebSocket("ws://localhost:8000/ws");
+        let mediaRecorder;
+        let isReady = false;
+        let audioId = "audio_" + Math.floor(Math.random() * 10000);
+
+        ws.onopen = () => {
+            ws.send(JSON.stringify({ event: "start_audio", payload: { id: audioId } }));
+        };
+
+        ws.onmessage = (event) => {
+            const data = JSON.parse(event.data);
+            if (data.event === "audio_saved") {
+                const log = document.getElementById("log");
+                const li = document.createElement("li");
+                li.innerHTML = `
+                    <b>Audio saved:</b><br/>
+                    <a href="${data.payload.url}" target="_blank">Download</a><br/>
+                    <b>Transcript:</b> ${data.payload.transcript}
+                `;
+                log.appendChild(li);
+            } else if (data.event === "error") {
+                const log = document.getElementById("log");
+                const li = document.createElement("li");
+                li.textContent = `Error: ${data.payload.message}`;
+                log.appendChild(li);
+            } else {
+                const log = document.getElementById("log");
+                const li = document.createElement("li");
+                li.textContent = event.data;
+                log.appendChild(li);
+
+                const message = JSON.parse(event.data);
+                if (message.event === "ready_for_audio") {
+                    isReady = true;
+                }
+            }
+        };
+
+        function startRecording() {
+            navigator.mediaDevices.getUserMedia({ audio: true }).then((stream) => {
+                mediaRecorder = new MediaRecorder(stream);
+                mediaRecorder.start(250);  // Emit every 250ms
+
+                mediaRecorder.ondataavailable = (e) => {
+                    if (isReady && e.data.size > 0) {
+                        e.data.arrayBuffer().then(buffer => {
+                            ws.send(buffer);  // Send binary chunk
+                        });
+                    }
+                };
+            });
+        }
+
+        function stopRecording() {
+            if (mediaRecorder && mediaRecorder.state !== "inactive") {
+                mediaRecorder.stop();
+                ws.send(JSON.stringify({ event: "stop_audio", payload: { id: audioId } }));
+            }
+        }
+    </script>
 </body>
 </html>
