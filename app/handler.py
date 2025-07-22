@@ -1,3 +1,4 @@
+import ssl
 import json
 import uuid
 import base64
@@ -10,6 +11,8 @@ import whisper
 from fastapi import WebSocket
 from pydub import AudioSegment
 
+ssl._create_default_https_context = ssl._create_unverified_context
+
 # import faster_whisper as whisper
 
 
@@ -18,7 +21,7 @@ class WebSocketConnection:
         self.websocket = websocket
         self.audio_chunks = []
         self.audio_id = None
-        self.temp_dir = Path("audio_uploads")
+        self.temp_dir = Path("../audio_uploads")
         self.temp_dir.mkdir(exist_ok=True)
         self.whisper_model = whisper.load_model("base")
         self.audio_mode = None

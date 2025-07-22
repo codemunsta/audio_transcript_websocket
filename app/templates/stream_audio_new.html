@@ -38,7 +38,7 @@
 
     ws.onopen = () => {
       log("Connected to server");
-      ws.send(JSON.stringify({ event: "ping", payload: "hello server" }));
+      ws.send(JSON.stringify({ event: "ping", payload: "Hello User" }));
     };
 
     ws.onmessage = (event) => {
@@ -52,7 +52,7 @@
 
     async function startRecording() {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      mediaRecorder = new MediaRecorder(stream, { mimeType: "audio/webm" });
+      mediaRecorder = new MediaRecorder(stream, { mimeType: "audio/webm;codecs=opus" });
 
       const mode = document.getElementById("mode").value;
 

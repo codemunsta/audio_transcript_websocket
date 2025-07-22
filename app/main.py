@@ -7,7 +7,7 @@ from fastapi import FastAPI, WebSocket, WebSocketDisconnect, HTTPException
 
 app = FastAPI()
 todos = []  # In-memory "database"
-app.mount("/audio", StaticFiles(directory="audio_uploads"), name="audio")
+app.mount("/Users/mac/codebase/demoapp/audio", StaticFiles(directory="audio_uploads"), name="audio")
 
 html = open("app/templates/stream_audio_new.html").read()
 html_2 = open("app/templates/stream_text.html").read()
