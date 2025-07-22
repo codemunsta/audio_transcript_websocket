@@ -4,14 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="df0c8c06-1cbc-4cd0-a004-82813d8bccd9" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/handler.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/handler.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/template/stream_audio.html" beforeDir="false" afterPath="$PROJECT_DIR$/app/templates/stream_audio.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/template/stream_audio_new.html" beforeDir="false" afterPath="$PROJECT_DIR$/app/templates/stream_audio_new.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/template/stream_text.html" beforeDir="false" afterPath="$PROJECT_DIR$/app/templates/stream_text.html" afterDir="false" />
-    </list>
+    <list default="true" id="df0c8c06-1cbc-4cd0-a004-82813d8bccd9" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
